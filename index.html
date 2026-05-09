@@ -1,0 +1,2236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenEMR India — Smart EHR Presentation</title>
+  <style>
+    :root {
+      --bg: #eef7f4;
+      --bg-soft: #f8fbff;
+      --surface: rgba(255, 255, 255, 0.78);
+      --surface-strong: rgba(255, 255, 255, 0.94);
+      --text: #10201d;
+      --muted: #60716e;
+      --line: rgba(16, 32, 29, 0.12);
+      --brand: #0f9f78;
+      --brand-2: #246bfe;
+      --brand-3: #7b4dff;
+      --warn: #f4a261;
+      --danger: #e76f51;
+      --good: #18a058;
+      --shadow: 0 24px 70px rgba(28, 51, 47, 0.14);
+      --shadow-soft: 0 16px 36px rgba(28, 51, 47, 0.10);
+      --radius-xl: 34px;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --max: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(15, 159, 120, 0.24), transparent 35%),
+        radial-gradient(circle at top right, rgba(36, 107, 254, 0.18), transparent 36%),
+        linear-gradient(135deg, #eef7f4 0%, #f8fbff 54%, #fff8f1 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(16, 32, 29, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16, 32, 29, 0.035) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 80%);
+      pointer-events: none;
+      z-index: -2;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      width: 0%;
+      background: linear-gradient(90deg, var(--brand), var(--brand-2), var(--brand-3));
+      z-index: 1000;
+      box-shadow: 0 0 18px rgba(15, 159, 120, 0.55);
+    }
+
+    .shell {
+      width: min(var(--max), calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .glass {
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      box-shadow: var(--shadow-soft);
+    }
+
+    header.nav {
+      position: sticky;
+      top: 14px;
+      z-index: 50;
+      margin-top: 14px;
+    }
+
+    .nav-inner {
+      width: min(1240px, calc(100% - 26px));
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 14px;
+      border-radius: 999px;
+    }
+
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: white;
+      box-shadow: 0 12px 24px rgba(15, 159, 120, 0.25);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.42);
+      border: 1px solid var(--line);
+    }
+
+    .nav-links a {
+      padding: 9px 13px;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      transition: 0.25s ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: white;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 10px 22px rgba(36, 107, 254, 0.16);
+    }
+
+    .nav-action {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill-btn,
+    .ghost-btn {
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 900;
+      padding: 11px 16px;
+      transition: 0.25s ease;
+      white-space: nowrap;
+    }
+
+    .pill-btn {
+      color: white;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 14px 28px rgba(15, 159, 120, 0.22);
+    }
+
+    .pill-btn:hover { transform: translateY(-2px); box-shadow: 0 18px 36px rgba(15, 159, 120, 0.30); }
+
+    .ghost-btn {
+      background: rgba(255, 255, 255, 0.62);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .ghost-btn:hover { transform: translateY(-2px); background: white; }
+
+    .mobile-toggle { display: none; }
+
+    .hero {
+      min-height: 84vh;
+      display: grid;
+      align-items: center;
+      padding: 72px 0 46px;
+      position: relative;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 34px;
+      align-items: center;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #08765b;
+      background: rgba(15, 159, 120, 0.11);
+      border: 1px solid rgba(15, 159, 120, 0.18);
+      padding: 9px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+
+    .pulse-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--brand);
+      box-shadow: 0 0 0 8px rgba(15, 159, 120, 0.12);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.18); opacity: 0.75; }
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(46px, 7vw, 90px);
+      line-height: 0.94;
+      letter-spacing: -0.078em;
+      max-width: 850px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(110deg, #08765b, #246bfe 48%, #7b4dff 90%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-lead {
+      color: var(--muted);
+      font-size: clamp(18px, 2vw, 23px);
+      line-height: 1.55;
+      margin: 24px 0 30px;
+      max-width: 720px;
+      font-weight: 650;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .trust-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .trust-chip {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .hero-visual {
+      position: relative;
+      min-height: 560px;
+    }
+
+    .orbit-card {
+      position: absolute;
+      inset: 26px 0 0 54px;
+      border-radius: var(--radius-xl);
+      background: linear-gradient(155deg, rgba(255,255,255,0.92), rgba(255,255,255,0.55));
+      border: 1px solid rgba(255, 255, 255, 0.84);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transform: rotate(1.2deg);
+    }
+
+    .orbit-card::before {
+      content: "";
+      position: absolute;
+      inset: -50%;
+      background: conic-gradient(from 90deg, transparent, rgba(15,159,120,0.18), transparent, rgba(36,107,254,0.22), transparent);
+      animation: spin 12s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .dashboard-mock {
+      position: absolute;
+      inset: 18px;
+      border-radius: 26px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.82));
+      overflow: hidden;
+      z-index: 2;
+      border: 1px solid var(--line);
+    }
+
+    .mock-top {
+      height: 58px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+    }
+
+    .mock-lights { display: flex; gap: 7px; }
+    .mock-lights span { width: 11px; height: 11px; border-radius: 99px; background: #dce5e2; }
+    .mock-lights span:nth-child(1) { background: #ff7b7b; }
+    .mock-lights span:nth-child(2) { background: #ffd166; }
+    .mock-lights span:nth-child(3) { background: #06d6a0; }
+
+    .mock-search {
+      width: 44%;
+      height: 28px;
+      border-radius: 999px;
+      background: #edf4f2;
+      border: 1px solid var(--line);
+    }
+
+    .mock-body {
+      display: grid;
+      grid-template-columns: 74px 1fr;
+      min-height: 480px;
+    }
+
+    .mock-side {
+      border-right: 1px solid var(--line);
+      padding: 16px 13px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+      background: rgba(15,159,120,0.04);
+    }
+
+    .side-dot {
+      height: 40px;
+      border-radius: 14px;
+      background: rgba(16, 32, 29, 0.08);
+    }
+    .side-dot:nth-child(1) { background: linear-gradient(135deg, var(--brand), var(--brand-2)); }
+
+    .mock-main { padding: 20px; }
+
+    .mock-title {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .mock-title strong { font-size: 22px; letter-spacing: -0.05em; }
+    .mock-title p { margin: 5px 0 0; color: var(--muted); font-size: 12px; font-weight: 750; }
+
+    .mini-chip {
+      color: #08765b;
+      background: rgba(15,159,120,0.1);
+      border: 1px solid rgba(15,159,120,0.18);
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .metric-mini {
+      border-radius: 18px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      background: white;
+      min-height: 106px;
+    }
+
+    .metric-mini b { font-size: 26px; letter-spacing: -0.06em; color: #08765b; }
+    .metric-mini p { margin: 8px 0 0; color: var(--muted); font-size: 12px; line-height: 1.35; font-weight: 750; }
+
+    .flow-line {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .flow-node {
+      border-radius: 14px;
+      background: rgba(36, 107, 254, 0.09);
+      border: 1px solid rgba(36,107,254,0.14);
+      min-height: 70px;
+      padding: 10px;
+      font-size: 11px;
+      font-weight: 900;
+      color: #1b4ecf;
+      display: flex;
+      align-items: end;
+    }
+
+    .floating-card {
+      position: absolute;
+      z-index: 5;
+      border-radius: 22px;
+      padding: 16px;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid rgba(255,255,255,0.9);
+      box-shadow: var(--shadow-soft);
+      animation: float 5.5s ease-in-out infinite;
+    }
+
+    .floating-card.one { left: 0; top: 86px; width: 190px; }
+    .floating-card.two { right: 0; bottom: 58px; width: 210px; animation-delay: -2s; }
+    .floating-card.three { left: 52px; bottom: 0; width: 205px; animation-delay: -3.2s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-14px); }
+    }
+
+    .floating-card small {
+      display: block;
+      color: var(--muted);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 10px;
+    }
+
+    .floating-card strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 22px;
+      letter-spacing: -0.06em;
+    }
+
+    .floating-card p { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.4; font-weight: 700; }
+
+    section {
+      padding: 86px 0;
+      scroll-margin-top: 110px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 30px;
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      color: #08765b;
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(34px, 4vw, 58px);
+      line-height: 1;
+      letter-spacing: -0.065em;
+    }
+
+    .section-lead {
+      max-width: 520px;
+      color: var(--muted);
+      line-height: 1.55;
+      font-weight: 650;
+      margin: 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .stat-card,
+    .feature-card,
+    .module-card,
+    .role-card,
+    .tech-card,
+    .flow-card,
+    .timeline-card {
+      border-radius: var(--radius-lg);
+      background: var(--surface-strong);
+      border: 1px solid rgba(255,255,255,0.82);
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card:hover,
+    .feature-card:hover,
+    .module-card:hover,
+    .role-card:hover,
+    .tech-card:hover,
+    .flow-card:hover,
+    .timeline-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 28px 60px rgba(28, 51, 47, 0.16);
+      border-color: rgba(15,159,120,0.32);
+    }
+
+    .stat-card {
+      padding: 26px;
+      min-height: 200px;
+    }
+
+    .stat-card::after,
+    .feature-card::after,
+    .module-card::after,
+    .role-card::after,
+    .tech-card::after {
+      content: "";
+      position: absolute;
+      inset: auto 18px 0;
+      height: 4px;
+      border-radius: 999px 999px 0 0;
+      background: linear-gradient(90deg, var(--brand), var(--brand-2), var(--brand-3));
+      transform: scaleX(0.35);
+      transform-origin: left;
+      transition: 0.32s ease;
+      opacity: 0.75;
+    }
+
+    .stat-card:hover::after,
+    .feature-card:hover::after,
+    .module-card:hover::after,
+    .role-card:hover::after,
+    .tech-card:hover::after { transform: scaleX(1); }
+
+    .stat-number {
+      font-size: 44px;
+      font-weight: 950;
+      letter-spacing: -0.08em;
+      color: #08765b;
+      margin-bottom: 14px;
+    }
+
+    .stat-card h3,
+    .feature-card h3,
+    .module-card h3,
+    .role-card h3,
+    .tech-card h3,
+    .flow-card h3,
+    .timeline-card h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      letter-spacing: -0.045em;
+    }
+
+    .stat-card p,
+    .feature-card p,
+    .module-card p,
+    .role-card p,
+    .tech-card p,
+    .flow-card p,
+    .timeline-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-weight: 650;
+      font-size: 14px;
+    }
+
+    .system-map {
+      display: grid;
+      grid-template-columns: 1fr 0.8fr 1fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-top: 24px;
+    }
+
+    .map-panel {
+      border-radius: var(--radius-xl);
+      padding: 26px;
+      min-height: 340px;
+      background: var(--surface-strong);
+      border: 1px solid rgba(255,255,255,0.82);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .map-panel h3 {
+      margin: 0 0 14px;
+      font-size: 24px;
+      letter-spacing: -0.05em;
+    }
+
+    .map-panel p { color: var(--muted); line-height: 1.55; font-weight: 650; }
+
+    .map-center {
+      display: grid;
+      place-items: center;
+      text-align: center;
+      background: linear-gradient(145deg, rgba(15,159,120,0.14), rgba(36,107,254,0.12));
+      border: 1px solid rgba(15,159,120,0.2);
+    }
+
+    .center-orb {
+      width: 176px;
+      height: 176px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: white;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2), var(--brand-3));
+      box-shadow: 0 28px 70px rgba(36,107,254,0.24);
+      position: relative;
+    }
+
+    .center-orb::before,
+    .center-orb::after {
+      content: "";
+      position: absolute;
+      inset: -16px;
+      border-radius: 50%;
+      border: 1px dashed rgba(15,159,120,0.35);
+      animation: spin 22s linear infinite;
+    }
+
+    .center-orb::after { inset: -34px; animation-duration: 32s; animation-direction: reverse; }
+
+    .center-orb b { font-size: 28px; letter-spacing: -0.08em; }
+
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 18px;
+    }
+
+    .soft-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 11px;
+      border-radius: 999px;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 850;
+      background: rgba(255,255,255,0.74);
+      border: 1px solid var(--line);
+    }
+
+    .soft-chip::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 99px;
+      background: var(--brand);
+    }
+
+    .tab-wrap {
+      border-radius: var(--radius-xl);
+      padding: 16px;
+      background: rgba(255,255,255,0.54);
+      border: 1px solid rgba(255,255,255,0.78);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .tab-btn {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.72);
+      color: var(--muted);
+      border-radius: 18px;
+      padding: 14px 12px;
+      font-weight: 950;
+      cursor: pointer;
+      transition: 0.25s ease;
+    }
+
+    .tab-btn.active,
+    .tab-btn:hover {
+      color: white;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      border-color: transparent;
+      transform: translateY(-2px);
+    }
+
+    .tab-panel {
+      display: none;
+      border-radius: 26px;
+      padding: 28px;
+      min-height: 326px;
+      background: var(--surface-strong);
+      border: 1px solid rgba(255,255,255,0.82);
+      animation: panelIn 0.35s ease;
+    }
+
+    .tab-panel.active { display: block; }
+
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .step {
+      position: relative;
+      min-height: 138px;
+      border-radius: 20px;
+      padding: 18px;
+      background: rgba(15,159,120,0.08);
+      border: 1px solid rgba(15,159,120,0.13);
+    }
+
+    .step::after {
+      content: "→";
+      position: absolute;
+      right: -14px;
+      top: 45%;
+      color: var(--brand);
+      font-weight: 950;
+      z-index: 1;
+    }
+
+    .step:last-child::after { content: ""; }
+
+    .step b {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 13px;
+      color: white;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      margin-bottom: 14px;
+    }
+
+    .step strong { font-size: 15px; letter-spacing: -0.04em; }
+    .step span { display: block; color: var(--muted); font-size: 12px; line-height: 1.45; margin-top: 8px; font-weight: 700; }
+
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      min-width: min(420px, 100%);
+      flex: 1;
+      height: 48px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.82);
+      padding: 0 18px;
+      outline: none;
+      font: inherit;
+      font-weight: 750;
+      color: var(--text);
+      box-shadow: 0 10px 24px rgba(28,51,47,0.06);
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.74);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 10px 13px;
+      font-size: 12px;
+      font-weight: 950;
+      cursor: pointer;
+      transition: 0.25s ease;
+    }
+
+    .filter-btn.active,
+    .filter-btn:hover {
+      color: white;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    }
+
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .module-card {
+      padding: 24px;
+      cursor: pointer;
+      min-height: 250px;
+    }
+
+    .module-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 22px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 14px 28px rgba(15,159,120,0.18);
+    }
+
+    .status {
+      padding: 7px 9px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #08765b;
+      background: rgba(15,159,120,0.1);
+      border: 1px solid rgba(15,159,120,0.18);
+      white-space: nowrap;
+    }
+
+    .status.demo { color: #8a5a00; background: rgba(244,162,97,0.14); border-color: rgba(244,162,97,0.25); }
+    .status.external { color: #7842c8; background: rgba(123,77,255,0.12); border-color: rgba(123,77,255,0.2); }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .tag {
+      border-radius: 999px;
+      background: rgba(16,32,29,0.055);
+      color: var(--muted);
+      padding: 7px 9px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .role-card { padding: 20px; min-height: 220px; }
+
+    .role-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 17px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(15,159,120,0.16), rgba(36,107,254,0.14));
+      margin-bottom: 15px;
+      font-size: 21px;
+    }
+
+    .tech-layout {
+      display: grid;
+      grid-template-columns: 0.72fr 1.28fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .stack-menu {
+      position: sticky;
+      top: 100px;
+      padding: 14px;
+      border-radius: var(--radius-lg);
+      background: rgba(255,255,255,0.64);
+      border: 1px solid rgba(255,255,255,0.86);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .stack-menu button {
+      width: 100%;
+      text-align: left;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      border-radius: 16px;
+      padding: 15px;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 950;
+      transition: 0.25s ease;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .stack-menu button.active,
+    .stack-menu button:hover {
+      color: white;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      transform: translateX(4px);
+    }
+
+    .tech-panel { display: none; }
+    .tech-panel.active { display: block; animation: panelIn 0.35s ease; }
+
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .tech-card { padding: 22px; }
+    .tech-card .version { color: #08765b; font-weight: 950; font-size: 12px; margin-bottom: 10px; display: inline-block; }
+
+    .timeline {
+      display: grid;
+      gap: 16px;
+    }
+
+    .timeline-card {
+      display: grid;
+      grid-template-columns: 170px 1fr auto;
+      gap: 18px;
+      align-items: center;
+      padding: 22px;
+    }
+
+    .timeline-date {
+      color: #08765b;
+      font-weight: 950;
+      letter-spacing: -0.04em;
+    }
+
+    .upgrade-badge {
+      border-radius: 999px;
+      padding: 8px 11px;
+      background: rgba(36,107,254,0.1);
+      color: #1b4ecf;
+      font-size: 12px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .cta {
+      border-radius: 44px;
+      padding: clamp(30px, 6vw, 58px);
+      background:
+        linear-gradient(135deg, rgba(15,159,120,0.92), rgba(36,107,254,0.88)),
+        radial-gradient(circle at top right, rgba(255,255,255,0.3), transparent 40%);
+      color: white;
+      box-shadow: 0 34px 90px rgba(15,159,120,0.25);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .cta::after {
+      content: "";
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      border-radius: 50%;
+      right: -120px;
+      top: -150px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.24);
+    }
+
+    .cta h2 { max-width: 780px; }
+    .cta p { max-width: 720px; line-height: 1.65; color: rgba(255,255,255,0.86); font-weight: 650; font-size: 18px; }
+    .cta .pill-btn { background: white; color: #08765b; }
+    .cta .ghost-btn { color: white; background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.32); }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 24, 25, 0.42);
+      backdrop-filter: blur(14px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      z-index: 200;
+    }
+
+    .modal-backdrop.active { display: flex; animation: fadeIn 0.22s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .modal {
+      width: min(900px, 100%);
+      max-height: min(760px, 88vh);
+      overflow: auto;
+      border-radius: 34px;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid rgba(255,255,255,0.86);
+      box-shadow: 0 40px 100px rgba(0,0,0,0.22);
+      padding: 26px;
+      animation: modalIn 0.28s ease;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(18px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 18px;
+    }
+
+    .modal-head h3 {
+      margin: 0 0 8px;
+      font-size: 32px;
+      letter-spacing: -0.06em;
+    }
+
+    .modal-head p { margin: 0; color: var(--muted); font-weight: 650; line-height: 1.55; }
+
+    .close-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 15px;
+      border: 1px solid var(--line);
+      background: white;
+      cursor: pointer;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .modal-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .modal-item {
+      padding: 15px;
+      border-radius: 18px;
+      background: rgba(15,159,120,0.06);
+      border: 1px solid rgba(15,159,120,0.12);
+    }
+
+    .modal-item b { display: block; margin-bottom: 7px; letter-spacing: -0.03em; }
+    .modal-item span { color: var(--muted); font-size: 13px; line-height: 1.45; font-weight: 650; }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.62s ease, transform 0.62s ease;
+    }
+
+    .reveal.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    footer {
+      padding: 36px 0 60px;
+      color: var(--muted);
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .integ-tabs { margin-top: 0; }
+
+    .integ-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .integ-card {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.82);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    .integ-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-soft);
+      border-color: rgba(15,159,120,0.3);
+    }
+
+    .integ-live { border-left: 3px solid var(--good); }
+    .integ-ready { border-left: 3px solid var(--brand-2); }
+
+    .integ-icon {
+      font-size: 26px;
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: rgba(15,159,120,0.08);
+      flex-shrink: 0;
+    }
+
+    .integ-card b {
+      display: block;
+      font-size: 15px;
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+    }
+
+    .integ-card span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      font-weight: 650;
+    }
+
+    @media (max-width: 720px) {
+      .integ-grid { grid-template-columns: 1fr; }
+    }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.94);
+      border: 1px solid rgba(255,255,255,0.9);
+      box-shadow: var(--shadow-soft);
+      transform: translateY(24px);
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.25s ease;
+      z-index: 300;
+      font-weight: 850;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 1080px) {
+      .hero-grid,
+      .tech-layout { grid-template-columns: 1fr; }
+      .hero-visual { min-height: 520px; }
+      .stats-grid,
+      .roles-grid { grid-template-columns: repeat(2, 1fr); }
+      .system-map { grid-template-columns: 1fr; }
+      .workflow { grid-template-columns: repeat(3, 1fr); }
+      .step::after { display: none; }
+      .stack-menu { position: relative; top: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .stack-menu button { justify-content: center; text-align: center; }
+    }
+
+    @media (max-width: 880px) {
+      .nav-links {
+        display: none;
+        position: absolute;
+        left: 18px;
+        right: 18px;
+        top: 72px;
+        border-radius: 24px;
+        padding: 12px;
+        grid-template-columns: repeat(2, 1fr);
+        background: rgba(255,255,255,0.94);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .nav-links.open { display: grid; }
+      .mobile-toggle { display: inline-flex; }
+      .hero { padding-top: 48px; }
+      .orbit-card { inset: 18px; }
+      .floating-card.one { left: 0; top: 36px; }
+      .floating-card.two { right: 0; }
+      .floating-card.three { display: none; }
+      .modules-grid,
+      .tech-grid { grid-template-columns: 1fr; }
+      .timeline-card { grid-template-columns: 1fr; }
+      .tabs { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 620px) {
+      .shell { width: min(var(--max), calc(100% - 24px)); }
+      .nav-inner { border-radius: 24px; }
+      .brand-lockup span { display: none; }
+      .nav-action .pill-btn { display: none; }
+      .hero-visual { min-height: 480px; }
+      .mock-body { grid-template-columns: 1fr; }
+      .mock-side { display: none; }
+      .metric-grid,
+      .stats-grid,
+      .roles-grid { grid-template-columns: 1fr; }
+      .workflow { grid-template-columns: 1fr; }
+      .section-head { display: block; }
+      .section-lead { margin-top: 14px; }
+      .tab-panel { padding: 20px; }
+      .modal-list { grid-template-columns: 1fr; }
+      .stack-menu { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar" id="progressBar"></div>
+
+  <header class="nav">
+    <div class="nav-inner glass">
+      <a href="#home" class="brand-lockup" aria-label="OpenEMR Presentation Home">
+        <span class="brand-mark">✚</span>
+        <span>OpenEMR India</span>
+      </a>
+      <nav class="nav-links" id="navLinks" aria-label="Primary navigation">
+        <a href="#overview">Overview</a>
+        <a href="#system">System</a>
+        <a href="#modules">Modules</a>
+        <a href="#roles">Users</a>
+        <a href="#tech">Tech</a>
+        <a href="#upgrades">Upgrades</a>
+        <a href="#integrations">Integrations</a>
+      </nav>
+      <div class="nav-action">
+        <button class="ghost-btn mobile-toggle" id="mobileToggle">Menu</button>
+        <button class="pill-btn" data-scroll="#modules">Explore Modules</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="shell hero-grid">
+        <div class="hero-copy reveal">
+          <div class="kicker"><span class="pulse-dot"></span> Custom OpenEMR • India Deployment</div>
+          <h1>Smarter <span class="gradient-text">Electronic Health Records</span> for OPD, IPD, Billing & Patient Portal.</h1>
+          <p class="hero-lead">A clean presentation website for non-developers: internal staff workflow, external patient access, custom modules, upgrades, and tech stack — all in one powerful story.</p>
+          <div class="hero-actions">
+            <button class="pill-btn" data-scroll="#system">View System Flow</button>
+            <button class="ghost-btn" data-open-summary>Quick Summary</button>
+          </div>
+          <div class="trust-row">
+            <span class="trust-chip">✅ ONC Certified Direction</span>
+            <span class="trust-chip">🧩 Modular Architecture</span>
+            <span class="trust-chip">🇮🇳 ABHA + PMJAY Ready</span>
+            <span class="trust-chip">⚡ Bootstrap 5 + Vite Upgrade</span>
+          </div>
+        </div>
+
+        <div class="hero-visual reveal">
+          <div class="orbit-card">
+            <div class="dashboard-mock">
+              <div class="mock-top">
+                <div class="mock-lights"><span></span><span></span><span></span></div>
+                <div class="mock-search"></div>
+                <span class="mini-chip">Live Dashboard</span>
+              </div>
+              <div class="mock-body">
+                <div class="mock-side"><span class="side-dot"></span><span class="side-dot"></span><span class="side-dot"></span><span class="side-dot"></span><span class="side-dot"></span></div>
+                <div class="mock-main">
+                  <div class="mock-title">
+                    <div><strong>Hospital Command Center</strong><p>Patient, doctor, bed, billing and OT activity.</p></div>
+                    <span class="mini-chip">Front Office</span>
+                  </div>
+                  <div class="metric-grid">
+                    <div class="metric-mini"><b data-count="128">0</b><p>OPD registrations today</p></div>
+                    <div class="metric-mini"><b data-count="42">0</b><p>Active IPD admissions</p></div>
+                    <div class="metric-mini"><b data-count="18">0</b><p>Available beds</p></div>
+                    <div class="metric-mini"><b data-count="9">0</b><p>Doctors available</p></div>
+                  </div>
+                  <div class="flow-line"><div class="flow-node">Register</div><div class="flow-node">Gate</div><div class="flow-node">Doctor</div><div class="flow-node">Billing</div><div class="flow-node">Portal</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="floating-card one"><small>Custom Module</small><strong>IPD + OT</strong><p>Admission, bed, vitals, surgery and discharge flow.</p></div>
+          <div class="floating-card two"><small>Patient Side</small><strong>Portal</strong><p>Appointments, reports, payments, ABHA and PMJAY.</p></div>
+          <div class="floating-card three"><small>Upgrade</small><strong>7× Faster</strong><p>Gulp workflow moved to Vite primary build.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="overview">
+      <div class="shell">
+        <div class="section-head reveal">
+          <div>
+            <div class="eyebrow">Executive Overview</div>
+            <h2>Minimal text. Maximum clarity.</h2>
+          </div>
+          <p class="section-lead">Designed so any stakeholder understands the full system in under 5 minutes — no technical background required.</p>
+        </div>
+        <div class="stats-grid reveal">
+          <div class="stat-card"><div class="stat-number" data-count="18">0</div><h3>Active Modules</h3><p>8 custom-built + 9 Laminas built-in — IPD, Frontdesk, ABHA, PMJAY, Immunization, CCR and more.</p></div>
+          <div class="stat-card"><div class="stat-number" data-count="9">0</div><h3>User Roles</h3><p>Admin, doctor, nurse, front desk, billing, lab, admission, OT and patient.</p></div>
+          <div class="stat-card"><div class="stat-number" data-count="30">0</div><h3>Language Ready</h3><p>Internationalization support with regional language-ready presentation.</p></div>
+          <div class="stat-card"><div class="stat-number" data-count="3">0</div><h3>Core Sides</h3><p>Patient portal, staff dashboard and connected database foundation.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="system">
+      <div class="shell">
+        <div class="section-head reveal">
+          <div>
+            <div class="eyebrow">System Overview</div>
+            <h2>Two sides. One healthcare engine.</h2>
+          </div>
+          <p class="section-lead">External patient access and internal staff workflows — both connected on the same OpenEMR foundation.</p>
+        </div>
+
+        <div class="system-map reveal">
+          <div class="map-panel">
+            <h3>Patient Portal</h3>
+            <p>Patients independently book appointments, view lab reports, make online payments, download receipts and manage their ABHA or government scheme eligibility.</p>
+            <div class="chip-list">
+              <span class="soft-chip">Appointments</span><span class="soft-chip">Reports</span><span class="soft-chip">Payments</span><span class="soft-chip">ABHA</span><span class="soft-chip">PMJAY</span><span class="soft-chip">Secure Messages</span>
+            </div>
+          </div>
+          <div class="map-panel map-center">
+            <div class="center-orb"><b>OpenEMR</b></div>
+          </div>
+          <div class="map-panel">
+            <h3>Core Dashboard</h3>
+            <p>Hospital staff log in with their assigned role — each user sees only what they need: registration, OPD, IPD, bed, OT, billing, lab, discharge and compliance.</p>
+            <div class="chip-list">
+              <span class="soft-chip">Frontdesk</span><span class="soft-chip">Doctor</span><span class="soft-chip">Nurse</span><span class="soft-chip">Billing</span><span class="soft-chip">Lab</span><span class="soft-chip">Admin</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-wrap reveal" style="margin-top: 26px;">
+          <div class="tabs" role="tablist">
+            <button class="tab-btn active" data-tab="opd">OPD Flow</button>
+            <button class="tab-btn" data-tab="ipd">IPD Flow</button>
+            <button class="tab-btn" data-tab="billing">Billing</button>
+            <button class="tab-btn" data-tab="portal">Portal</button>
+          </div>
+          <div class="tab-panel active" id="tab-opd">
+            <h3>OPD: Fast patient journey</h3>
+            <p>Complete outpatient journey — from reception to doctor encounter and lab receipt.</p>
+            <div class="workflow"><div class="step"><b>1</b><strong>Register</strong><span>Demographics, Aadhaar, address.</span></div><div class="step"><b>2</b><strong>Appointment</strong><span>Doctor slot and token.</span></div><div class="step"><b>3</b><strong>Gate Check</strong><span>Patient arrival confirmed.</span></div><div class="step"><b>4</b><strong>OPD Fee</strong><span>Cash / Razorpay payment.</span></div><div class="step"><b>5</b><strong>Doctor</strong><span>SOAP, Rx, orders.</span></div><div class="step"><b>6</b><strong>Lab / Portal</strong><span>Reports visible online.</span></div></div>
+          </div>
+          <div class="tab-panel" id="tab-ipd">
+            <h3>IPD: Admission to discharge</h3>
+            <p>Doctor admission advice, admission desk, ward dashboard, OT, billing and discharge summary.</p>
+            <div class="workflow"><div class="step"><b>1</b><strong>Advice</strong><span>Doctor recommends admission.</span></div><div class="step"><b>2</b><strong>Admit</strong><span>Admission desk assigns bed.</span></div><div class="step"><b>3</b><strong>Ward</strong><span>Vitals, notes, medicines.</span></div><div class="step"><b>4</b><strong>OT</strong><span>Surgery booking + checklist.</span></div><div class="step"><b>5</b><strong>Final Bill</strong><span>Draft, final, cleared.</span></div><div class="step"><b>6</b><strong>Discharge</strong><span>PDF summary after clearance.</span></div></div>
+          </div>
+          <div class="tab-panel" id="tab-billing">
+            <h3>Billing: OPD + IPD + Lab</h3>
+            <p>Advance payments, insurance verification, pre-auth, claims, Razorpay and receipts in one operational finance flow.</p>
+            <div class="workflow"><div class="step"><b>1</b><strong>Charge</strong><span>OPD, lab, room, procedure.</span></div><div class="step"><b>2</b><strong>Collect</strong><span>Cash or online.</span></div><div class="step"><b>3</b><strong>Verify</strong><span>Insurance eligibility.</span></div><div class="step"><b>4</b><strong>Pre-Auth</strong><span>Approval before treatment.</span></div><div class="step"><b>5</b><strong>Claim</strong><span>Submit insurance claim.</span></div><div class="step"><b>6</b><strong>Receipt</strong><span>Print / download.</span></div></div>
+          </div>
+          <div class="tab-panel" id="tab-portal">
+            <h3>Portal: Patient self-service</h3>
+            <p>Patients handle everything independently — appointments, reports, payments, ABHA and PMJAY eligibility, all online.</p>
+            <div class="workflow"><div class="step"><b>1</b><strong>Login</strong><span>Secure patient access.</span></div><div class="step"><b>2</b><strong>Book</strong><span>Appointment schedule.</span></div><div class="step"><b>3</b><strong>Reports</strong><span>Lab and prescriptions.</span></div><div class="step"><b>4</b><strong>Pay</strong><span>Online fees.</span></div><div class="step"><b>5</b><strong>Identity</strong><span>ABHA linking.</span></div><div class="step"><b>6</b><strong>Scheme</strong><span>Govt eligibility.</span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="modules">
+      <div class="shell">
+        <div class="section-head reveal">
+          <div>
+            <div class="eyebrow">Custom Modules</div>
+            <h2>Click any module. Explain like demo.</h2>
+          </div>
+          <p class="section-lead">Search and filter to explore every module. Click any card to open full feature details in a modal overlay.</p>
+        </div>
+
+        <div class="toolbar reveal">
+          <input class="search-box" id="moduleSearch" type="search" placeholder="Search module: IPD, ABHA, Billing, OT, Frontdesk..." />
+          <div class="filter-row" aria-label="Module filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="clinical">Clinical</button>
+            <button class="filter-btn" data-filter="operations">Operations</button>
+            <button class="filter-btn" data-filter="india">India</button>
+            <button class="filter-btn" data-filter="compliance">Compliance</button>
+            <button class="filter-btn" data-filter="laminas">Laminas Built-in</button>
+          </div>
+        </div>
+
+        <div class="modules-grid reveal" id="modulesGrid"></div>
+      </div>
+    </section>
+
+    <section id="roles">
+      <div class="shell">
+        <div class="section-head reveal">
+          <div>
+            <div class="eyebrow">Users & Access</div>
+            <h2>Role-based clarity.</h2>
+          </div>
+          <p class="section-lead">Same system, different view. ACL controls what each hospital role can see and do.</p>
+        </div>
+        <div class="roles-grid reveal" id="rolesGrid"></div>
+      </div>
+    </section>
+
+    <section id="tech">
+      <div class="shell">
+        <div class="section-head reveal">
+          <div>
+            <div class="eyebrow">Technology Stack</div>
+            <h2>Legacy stable. Modern upgraded.</h2>
+          </div>
+          <p class="section-lead">Frontend, backend, database, security, PDF, payments and dev tools — grouped for presentation clarity.</p>
+        </div>
+
+        <div class="tech-layout reveal">
+          <div class="stack-menu" id="stackMenu">
+            <button class="active" data-stack="frontend">Frontend <span>↗</span></button>
+            <button data-stack="backend">Backend <span>↗</span></button>
+            <button data-stack="database">Database <span>↗</span></button>
+            <button data-stack="security">Security <span>↗</span></button>
+            <button data-stack="build">Build & QA <span>↗</span></button>
+          </div>
+          <div>
+            <div class="tech-panel active" id="stack-frontend"><div class="tech-grid" data-tech="frontend"></div></div>
+            <div class="tech-panel" id="stack-backend"><div class="tech-grid" data-tech="backend"></div></div>
+            <div class="tech-panel" id="stack-database"><div class="tech-grid" data-tech="database"></div></div>
+            <div class="tech-panel" id="stack-security"><div class="tech-grid" data-tech="security"></div></div>
+            <div class="tech-panel" id="stack-build"><div class="tech-grid" data-tech="build"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="upgrades">
+      <div class="shell">
+        <div class="section-head reveal">
+          <div>
+            <div class="eyebrow">Upgrade Story</div>
+            <h2>Before → After transformation.</h2>
+          </div>
+          <p class="section-lead">A clear timeline showing the before-to-after upgrade impact — each phase delivered measurable improvement.</p>
+        </div>
+        <div class="timeline reveal">
+          <div class="timeline-card"><div class="timeline-date">Phase 1</div><div><h3>Bootstrap 4 → Bootstrap 5</h3><p>UI foundation fully modernized: BS5 theme, DataTables BS5, Summernote BS5 and a jQuery compatibility shim.</p></div><span class="upgrade-badge">Modern UI</span></div>
+          <div class="timeline-card"><div class="timeline-date">Phase 2</div><div><h3>Gulp → Vite Primary Build</h3><p>Theme build time dropped from ~3.5 minutes to ~30 seconds — a 7× speed improvement for the developer workflow.</p></div><span class="upgrade-badge">Speed</span></div>
+          <div class="timeline-card"><div class="timeline-date">Phase 3</div><div><h3>ESLint Enforcement</h3><p>Strict quality rules enforced on all new files: no-var, prefer-const, eqeqeq and zero warnings allowed.</p></div><span class="upgrade-badge">Quality</span></div>
+          <div class="timeline-card"><div class="timeline-date">Phase 4</div><div><h3>India Healthcare Modules</h3><p>ABHA digital health identity, PMJAY eligibility flow, Aadhaar field, India states and cities data — production-ready localization.</p></div><span class="upgrade-badge">India Ready</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="integrations">
+      <div class="shell">
+        <div class="section-head reveal">
+          <div>
+            <div class="eyebrow">Integrations</div>
+            <h2>Connected to India's digital ecosystem.</h2>
+          </div>
+          <p class="section-lead">Active integrations already running, plus ready-to-activate services for communication, payments, government APIs and clinical tools.</p>
+        </div>
+
+        <div class="integ-tabs reveal">
+          <div class="tabs" role="tablist">
+            <button class="tab-btn active" data-tab="integ-active">Already Active</button>
+            <button class="tab-btn" data-tab="integ-govt">Govt APIs</button>
+            <button class="tab-btn" data-tab="integ-comm">Communication</button>
+            <button class="tab-btn" data-tab="integ-clinical">Clinical</button>
+          </div>
+
+          <div class="tab-panel active" id="tab-integ-active">
+            <h3>Live integrations — working right now</h3>
+            <p>These services are already configured and operational in the current deployment.</p>
+            <div class="integ-grid">
+              <div class="integ-card integ-live">
+                <div class="integ-icon">💳</div>
+                <div><b>Razorpay Payments</b><span>OPD, IPD and Lab fee collection — online payment gateway with callback handling.</span></div>
+              </div>
+              <div class="integ-card integ-live">
+                <div class="integ-icon">🇮🇳</div>
+                <div><b>ABHA Digital Health ID</b><span>6-step patient identity linking via NHA — demo mode, ready for production API key.</span></div>
+              </div>
+              <div class="integ-card integ-live">
+                <div class="integ-icon">🪪</div>
+                <div><b>PMJAY Govt Scheme</b><span>Ayushman Bharat eligibility check — 6-step flow with scheme auto-detection.</span></div>
+              </div>
+              <div class="integ-card integ-live">
+                <div class="integ-icon">📧</div>
+                <div><b>Email — PHPMailer</b><span>SMTP-based email ready — appointment confirmations, lab reports and billing alerts.</span></div>
+              </div>
+              <div class="integ-card integ-live">
+                <div class="integ-icon">📱</div>
+                <div><b>SMS — Twilio</b><span>SMS integration configured — OTP delivery, appointment reminders and patient alerts.</span></div>
+              </div>
+              <div class="integ-card integ-live">
+                <div class="integ-icon">📄</div>
+                <div><b>PDF Generation</b><span>mPDF and DomPDF — discharge summaries, bills, receipts and lab reports as PDF.</span></div>
+              </div>
+              <div class="integ-card integ-live">
+                <div class="integ-icon">🔐</div>
+                <div><b>OAuth2 + FHIR R4</b><span>Secure API access and FHIR-standard health data interoperability built in.</span></div>
+              </div>
+              <div class="integ-card integ-live">
+                <div class="integ-icon">📦</div>
+                <div><b>QR Code Generator</b><span>Patient QR codes for quick registration, bill scanning and appointment check-in.</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="tab-integ-govt">
+            <h3>India Government APIs — ready to activate</h3>
+            <p>These government APIs plug directly into OpenEMR workflows — each adds verified, official data.</p>
+            <div class="integ-grid">
+              <div class="integ-card integ-ready">
+                <div class="integ-icon">📮</div>
+                <div><b>India Post Pincode API</b><span>Type pincode → city, district and state auto-fill instantly. Free government API, zero cost.</span></div>
+              </div>
+              <div class="integ-card integ-ready">
+                <div class="integ-icon">🪪</div>
+                <div><b>Aadhaar eKYC</b><span>Verify patient identity via Aadhaar OTP — eliminates manual data entry errors at registration.</span></div>
+              </div>
+              <div class="integ-card integ-ready">
+                <div class="integ-icon">📂</div>
+                <div><b>DigiLocker</b><span>Pull patient documents directly from DigiLocker — Aadhaar card, driving licence, health records.</span></div>
+              </div>
+              <div class="integ-card integ-ready">
+                <div class="integ-icon">💉</div>
+                <div><b>CoWIN / ABHA Vaccination</b><span>Fetch and verify patient vaccination certificates from the national CoWIN registry.</span></div>
+              </div>
+              <div class="integ-card integ-ready">
+                <div class="integ-icon">🏥</div>
+                <div><b>eSanjeevani Telemedicine</b><span>Government-backed video consultation integration for remote patient consultations.</span></div>
+              </div>
+              <div class="integ-card integ-ready">
+                <div class="integ-icon">🧾</div>
+                <div><b>GST Invoice API</b><span>Generate GST-compliant invoices for hospital billing — GSTIN validation included.</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="tab-integ-comm">
+            <h3>Communication integrations — reach patients anywhere</h3>
+            <p>Automated messages that keep patients informed — appointments, reports, bills and reminders.</p>
+            <div class="integ-grid">
+              <div class="integ-card integ-ready">
+                <div class="integ-icon">💬</div>
+                <div><b>WhatsApp Business API</b><span>Send appointment reminders, lab reports, discharge summaries and bills directly on WhatsApp.</span></div>
+              </div>
+              <div class="integ-card integ-ready">
+                <div class="integ-icon">📩</div>
+                <div><b>Email Appointment Reminders</b><span>Auto-email D-1 reminder with appointment details, doctor name and location map link.</span></div>
+              </div>
+              <div class="integ-card integ-ready">
+                <div class="integ-icon">📲</div>
+                <div><b>SMS — MSG91</b><span>Bulk SMS and OTP delivery — cost-effective alternative to Twilio for India deployments.</span></div>
+              </div>
+              <div class="integ-card integ-ready">
+                <div class="integ-icon">🔔</div>
+                <div><b>Push Notifications</b><span>Browser push notifications for patient portal — lab ready, appointment confirmed, bill generated.</span></div>
+              </div>
+              <div class="integ-card integ-ready">
+                <div class="integ-icon">📠</div>
+                <div><b>Fax — etherFAX</b><span>Digital fax for sending referral letters, prescriptions and reports to other facilities.</span></div>
+              </div>
+              <div class="integ-card integ-ready">
+                <div class="integ-icon">📋</div>
+                <div><b>Email Lab Reports</b><span>Lab report PDF auto-emailed to patient as soon as results are approved by the lab.</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="tab-integ-clinical">
+            <h3>Clinical integrations — smarter care delivery</h3>
+            <p>Tools that connect OpenEMR directly to medical devices, databases and external clinical systems.</p>
+            <div class="integ-grid">
+              <div class="integ-card integ-ready">
+                <div class="integ-icon">🔬</div>
+                <div><b>Lab Equipment HL7</b><span>Lab analyzers send results directly into OpenEMR via HL7 — eliminates manual data entry.</span></div>
+              </div>
+              <div class="integ-card integ-ready">
+                <div class="integ-icon">🩻</div>
+                <div><b>DICOM Image Viewer</b><span>View X-ray, CT and MRI scans inside OpenEMR using the built-in DWV DICOM viewer.</span></div>
+              </div>
+              <div class="integ-card integ-ready">
+                <div class="integ-icon">💊</div>
+                <div><b>Drug Database</b><span>Medicine name search, dosage lookup and drug interaction alerts during prescription.</span></div>
+              </div>
+              <div class="integ-card integ-ready">
+                <div class="integ-icon">📡</div>
+                <div><b>Weno eRx — E-Prescription</b><span>Send prescriptions digitally to pharmacies — patient collects medicine without a paper slip.</span></div>
+              </div>
+              <div class="integ-card integ-ready">
+                <div class="integ-icon">🎥</div>
+                <div><b>Telehealth — Comlink</b><span>Video consultation inside the patient portal — doctor and patient connect remotely.</span></div>
+              </div>
+              <div class="integ-card integ-ready">
+                <div class="integ-icon">🏷️</div>
+                <div><b>ICD-10 / SNOMED Live Search</b><span>Doctor types a symptom — matching diagnosis codes appear instantly for accurate coding.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="final">
+      <div class="shell reveal">
+        <div class="cta">
+          <div class="eyebrow" style="color: rgba(255,255,255,0.78);">Demo Closing Slide</div>
+          <h2>OpenEMR is not only an EHR — it is a full hospital operations platform.</h2>
+          <p>Patient portal, OPD, IPD, OT, billing, insurance, ABHA, PMJAY, role-based dashboard and compliance exports — all connected into a modular healthcare foundation.</p>
+          <div class="hero-actions">
+            <button class="pill-btn" data-scroll="#home">Back to Top</button>
+            <button class="ghost-btn" data-open-summary>Open Summary</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">OpenEMR Presentation Website • Custom India Deployment • Built for stakeholder demo</div>
+  </footer>
+
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <div>
+          <h3 id="modalTitle">Module Title</h3>
+          <p id="modalDesc">Module description</p>
+        </div>
+        <button class="close-btn" id="closeModal" aria-label="Close modal">×</button>
+      </div>
+      <div class="modal-list" id="modalList"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Ready</div>
+
+  <script>
+    const modules = [
+      {
+        title: "IPD + OT System",
+        icon: "🏥",
+        status: "Active",
+        category: "clinical operations",
+        desc: "Admission, bed allocation, ward chart, OT booking, checklist, billing and discharge summary.",
+        tags: ["Admission", "Ward", "OT", "Discharge"],
+        details: [
+          ["Admission Advice", "Doctor sends patient to IPD pending queue."],
+          ["Bed Allotment", "Admission staff assigns ward, room and bed."],
+          ["Ward Dashboard", "Vitals, progress notes, medicines and active patient list."],
+          ["OT Lifecycle", "Scheduled → in progress → completed surgery workflow."],
+          ["Discharge Block", "Discharge allowed only after billing clearance."],
+          ["PDF Summary", "mPDF-based discharge summary with complete case view."]
+        ]
+      },
+      {
+        title: "Frontdesk Workflow",
+        icon: "🧾",
+        status: "Active",
+        category: "operations",
+        desc: "Registration, appointment scheduling, gate check, OPD payment and lab billing flow.",
+        tags: ["Registration", "Queue", "Receipt", "Lab"],
+        details: [
+          ["Patient Registration", "Demographics, photo, Aadhaar and address details."],
+          ["Gate Check", "Confirm arrival and add patient to queue."],
+          ["OPD Fee", "Cash or Razorpay fee collection."],
+          ["Lab Billing", "Test charges, payment and receipts."],
+          ["Insurance", "Lab insurance verification, pre-auth and claim."],
+          ["Receipt", "Printable OPD and lab receipt flow."]
+        ]
+      },
+      {
+        title: "Frontdesk Dashboard",
+        icon: "📊",
+        status: "Active",
+        category: "operations",
+        desc: "Real-time receptionist dashboard for appointments, beds, payments and doctors.",
+        tags: ["Live View", "Beds", "Payments", "Alerts"],
+        details: [
+          ["Today Appointments", "Confirmed and pending appointment count."],
+          ["Bed Status", "Occupied vs available beds."],
+          ["OPD Overview", "Today patient intake count."],
+          ["IPD Overview", "Current admissions count."],
+          ["Payments Today", "Cash and online collection overview."],
+          ["Doctor Availability", "Which doctor is currently available."]
+        ]
+      },
+      {
+        title: "Dashboard Context",
+        icon: "🧭",
+        status: "Active",
+        category: "clinical operations",
+        desc: "Role-wise context view: emergency, inpatient, outpatient, pediatric and more.",
+        tags: ["Context", "ACL", "Audit", "Role Lock"],
+        details: [
+          ["Role Defaults", "Nurse can open nursing-focused context by default."],
+          ["Lock Users", "Admin can lock a role to a specific view."],
+          ["Audit Log", "Track who opened which context and when."],
+          ["Emergency", "Critical patient view for urgent cases."],
+          ["Inpatient", "Admitted patient context."],
+          ["Specialty", "Specialist doctor-focused patient context."]
+        ]
+      },
+      {
+        title: "ABHA Identity",
+        icon: "🇮🇳",
+        status: "Demo Mode",
+        category: "india",
+        desc: "Digital Health ID linking with OTP, consent and linked health records demo flow.",
+        tags: ["ABHA", "OTP", "Consent", "Health ID"],
+        details: [
+          ["ABHA ID Entry", "Patient enters 14-digit ABHA ID."],
+          ["OTP Verify", "Mobile or Aadhaar OTP verification demo."],
+          ["Profile Fill", "Patient profile can auto-fill after verification."],
+          ["Consent", "Patient controls what can be shared."],
+          ["Record Link", "Lab results, prescriptions and visits can be linked."],
+          ["NHA API", "Real use needs production credentials."]
+        ]
+      },
+      {
+        title: "PMJAY / Govt Scheme",
+        icon: "🪪",
+        status: "Demo Mode",
+        category: "india operations",
+        desc: "Ayushman Bharat eligibility check with identity, OTP, scheme detect and result.",
+        tags: ["PMJAY", "Eligibility", "OTP", "Coverage"],
+        details: [
+          ["Identity", "Aadhaar, mobile or health card."],
+          ["OTP", "Demo verification step."],
+          ["Auto Detect", "Scheme detection such as PMJAY / MJPJAY / TPA."],
+          ["Manual Override", "Staff can correct scheme if wrong."],
+          ["Eligibility", "Coverage amount and validity dates."],
+          ["Portal Flow", "Patient-side 6-step user journey."]
+        ]
+      },
+      {
+        title: "EHI Exporter",
+        icon: "📦",
+        status: "Active",
+        category: "compliance",
+        desc: "Electronic Health Information export for single patient or full practice backup.",
+        tags: ["ONC", "Export", "ZIP", "Admin"],
+        details: [
+          ["Single Patient", "Download one patient complete health data."],
+          ["Full Practice", "Export all patient data for compliance backup."],
+          ["Job Tracking", "Monitor export job status."],
+          ["Admin Only", "Restricted under administrative access."],
+          ["EHI", "Supports healthcare information export requirements."],
+          ["Backup", "Useful for migration and compliance evidence."]
+        ]
+      },
+      {
+        title: "Prior Authorizations",
+        icon: "✅",
+        status: "Active",
+        category: "operations compliance",
+        desc: "Insurance permission tracking before treatment with auth number, CPT and units.",
+        tags: ["Insurance", "CPT", "Units", "Reports"],
+        details: [
+          ["Auth Number", "Insurance approval reference."],
+          ["Date Range", "Authorization validity start and end."],
+          ["CPT Code", "Treatment/procedure mapping."],
+          ["Units", "Initial allowed and remaining units."],
+          ["Reports", "Insurance authorizations report view."],
+          ["Patient Tab", "Per-patient authorization list."]
+        ]
+      },
+      {
+        title: "External Registered Modules",
+        icon: "🔌",
+        status: "External",
+        category: "operations",
+        desc: "ClaimRev, Comlink Telehealth, DORN, FaxSMS and Weno eRx need external accounts.",
+        tags: ["Telehealth", "SMS", "Claims", "eRx"],
+        details: [
+          ["ClaimRev", "Paid account for automated claim processing."],
+          ["Comlink", "Telehealth account for video consultation."],
+          ["DORN", "Drug ordering network."],
+          ["FaxSMS", "Twilio, etherFAX and RingCentral based communication."],
+          ["Weno eRx", "Electronic prescriptions to pharmacy direct."],
+          ["Note", "Registered only until external credentials are added."]
+        ]
+      },
+      {
+        title: "Immunization",
+        icon: "💉",
+        status: "Active",
+        category: "laminas clinical",
+        desc: "Complete patient vaccination record management — doses, dates and vaccine history.",
+        tags: ["Vaccines", "Doses", "History", "Clinical"],
+        details: [
+          ["Vaccination Records", "Track all patient vaccines — Polio, Hepatitis, COVID and more."],
+          ["Dose History", "Full dose schedule with dates and batch info."],
+          ["Clinical Alerts", "Overdue vaccination reminders."],
+          ["Standard Codes", "Linked to CVX immunization codes."],
+          ["Report Ready", "Vaccination history available in patient summary."],
+          ["Built-in Module", "Official OpenEMR Laminas module — no setup required."]
+        ]
+      },
+      {
+        title: "Documents",
+        icon: "📁",
+        status: "Active",
+        category: "laminas clinical",
+        desc: "Patient document management — upload, organize and retrieve lab reports, X-rays and consent forms.",
+        tags: ["Upload", "PDF", "X-ray", "Consent"],
+        details: [
+          ["File Upload", "Attach lab reports, X-rays, PDFs and images to patient."],
+          ["Organized Storage", "Categorized document repository per patient."],
+          ["Quick Retrieval", "Fast search and access from patient chart."],
+          ["Consent Forms", "Store signed consent documents digitally."],
+          ["CCR Dependency", "Required by CCR and CareCoordination modules."],
+          ["Built-in Module", "Official OpenEMR Laminas module — active and ready."]
+        ]
+      },
+      {
+        title: "CCR — Continuity of Care",
+        icon: "🔁",
+        status: "Active",
+        category: "laminas clinical",
+        desc: "Transfer a complete patient care summary from one doctor or facility to another in XML format.",
+        tags: ["Care Transfer", "XML", "Summary", "Interop"],
+        details: [
+          ["Care Summary", "Export complete patient snapshot — diagnoses, meds, allergies."],
+          ["XML Format", "Standard CCR XML for cross-system sharing."],
+          ["Doctor Transfer", "Send patient records to referring or receiving physician."],
+          ["Facility Transfer", "Move patient data between hospital departments."],
+          ["Depends On", "Requires Documents module to be active."],
+          ["Built-in Module", "Official OpenEMR Laminas module — active."]
+        ]
+      },
+      {
+        title: "Care Coordination",
+        icon: "🤝",
+        status: "Active",
+        category: "laminas clinical",
+        desc: "Coordinate patient care across multiple doctors, departments and teams from a single view.",
+        tags: ["Multi-team", "Coordination", "Workflow", "Clinical"],
+        details: [
+          ["Multi-doctor", "Multiple physicians can collaborate on one patient."],
+          ["Department Sync", "Coordinate across OPD, IPD, lab and specialty."],
+          ["Care Plan", "Shared patient care plan accessible by all assigned staff."],
+          ["Depends On", "Requires CCR, Immunization, SyndromicSurveillance and Documents."],
+          ["Alerts", "Notify team members of care plan updates."],
+          ["Built-in Module", "Official OpenEMR Laminas module — active."]
+        ]
+      },
+      {
+        title: "Syndromic Surveillance",
+        icon: "📡",
+        status: "Active",
+        category: "laminas compliance",
+        desc: "Detect and report disease outbreaks by sending anonymized patient data to government health agencies.",
+        tags: ["Outbreak", "CDC", "Anonymized", "Compliance"],
+        details: [
+          ["Outbreak Detection", "Identify unusual symptom patterns across patients."],
+          ["Govt Reporting", "Send anonymized data to CDC or state health agencies."],
+          ["Privacy Safe", "Patient identity is fully anonymized before reporting."],
+          ["CDC Compliance", "Supports public health reporting requirements."],
+          ["Automated", "Runs in the background — no manual action needed."],
+          ["Built-in Module", "Official OpenEMR Laminas module — active."]
+        ]
+      },
+      {
+        title: "Code Types",
+        icon: "🏷️",
+        status: "Active",
+        category: "laminas clinical",
+        desc: "Automatically maps medical codes — SNOMED, CPT4 and ICD-10 — to internal OpenEMR lists.",
+        tags: ["SNOMED", "CPT4", "ICD-10", "Auto-map"],
+        details: [
+          ["SNOMED", "Clinical terminology codes auto-mapped."],
+          ["CPT4", "Procedure codes linked for billing accuracy."],
+          ["ICD-10", "Diagnosis codes mapped to encounters."],
+          ["Background", "Runs silently — no configuration or action needed."],
+          ["Accuracy", "Reduces manual coding errors across clinical and billing flows."],
+          ["Built-in Module", "Official OpenEMR Laminas module — always active."]
+        ]
+      },
+      {
+        title: "Patient Filter",
+        icon: "🔒",
+        status: "Active",
+        category: "laminas compliance",
+        desc: "Restrict specific users from viewing specific patients using a configurable blacklist.",
+        tags: ["Blacklist", "Access", "Privacy", "ACL"],
+        details: [
+          ["User Blacklist", "Define which users cannot see which patients."],
+          ["Privacy Control", "Prevent unauthorized staff from accessing sensitive records."],
+          ["Config File", "Managed via PatientFilter/config/blacklist.php."],
+          ["Upgrade ACL", "ACL version upgrade button available in module manager."],
+          ["Complements ACL", "Works alongside role-based access control."],
+          ["Built-in Module", "Official OpenEMR Laminas module — v0.2.1 active."]
+        ]
+      },
+      {
+        title: "Patient Validation",
+        icon: "✔️",
+        status: "Active",
+        category: "laminas operations",
+        desc: "Add custom mandatory fields and validation rules to the new patient registration form.",
+        tags: ["Validation", "Mandatory", "Registration", "Custom"],
+        details: [
+          ["Custom Fields", "Define which fields are required during new patient registration."],
+          ["Validation Rules", "Set format and content rules for patient data entry."],
+          ["Error Messages", "Display clear error guidance to front desk staff."],
+          ["Enable Path", "Admin → Globals → New Patient Form → Laminas module."],
+          ["No Coding", "Configured via admin settings — no code changes needed."],
+          ["Built-in Module", "Official OpenEMR Laminas module — active."]
+        ]
+      },
+      {
+        title: "Prescription Templates",
+        icon: "🖨️",
+        status: "Active",
+        category: "laminas clinical",
+        desc: "Customize the prescription print and PDF layout — logo, format, sections and branding.",
+        tags: ["Print", "PDF", "Layout", "Branding"],
+        details: [
+          ["Logo", "Add hospital logo to printed prescriptions."],
+          ["Layout", "Customize section order, font and spacing."],
+          ["PDF Export", "Generate branded PDF prescriptions."],
+          ["HTML Template", "Fully customizable HTML-based design."],
+          ["Enable Path", "Admin → Globals → Rx tab → select template."],
+          ["Built-in Module", "Official OpenEMR Laminas module — active."]
+        ]
+      }
+    ];
+
+    const roles = [
+      ["👑", "Admin", "Full system control: users, roles, ACL, settings, modules and EHI export."],
+      ["👨‍⚕️", "Doctor", "Clinical encounters, SOAP notes, prescriptions, lab orders, IPD chart and discharge summary."],
+      ["🩺", "Nurse", "Ward vitals, progress notes, medication chart and pre-op checklist."],
+      ["🛎️", "Front Desk", "Registration, appointment scheduling, gate check and fee collection."],
+      ["💳", "Billing", "OPD/IPD billing, advance payments, insurance and Razorpay."],
+      ["🧪", "Lab Staff", "Lab billing, lab receipts, insurance verification and lab claims."],
+      ["🛏️", "Admission Staff", "Admission advice processing and bed allotment."],
+      ["🔪", "OT Staff", "OT booking, OT dashboard and surgery status tracking."],
+      ["📱", "Patient", "Portal access for appointment, reports, payments, ABHA and scheme eligibility."]
+    ];
+
+    const stacks = {
+      frontend: [
+        ["Bootstrap", "5.3.3", "Primary UI framework with Bootswatch theme support."],
+        ["jQuery", "3.7.1", "Core DOM and legacy OpenEMR interface behavior."],
+        ["AngularJS", "1.8.3", "Legacy clinical form dependency support."],
+        ["Chart.js", "4.5.1", "Modern data visualization for dashboards."],
+        ["DataTables", "1.13.11", "Sortable and searchable clinical/finance tables."],
+        ["CKEditor 5", "46.1.1", "Modern rich text editing."],
+        ["Select2", "4.0.13", "Better searchable dropdown experience."],
+        ["DOMPurify", "3.3.1", "HTML sanitization for safer rendering."]
+      ],
+      backend: [
+        ["PHP", "8.2+", "Core OpenEMR backend language."],
+        ["Laminas MVC", "3.8.0", "Modern module framework."],
+        ["Symfony Components", "6.4.x", "Console, HTTP lifecycle, DI and utility components."],
+        ["Monolog", "3.9.0", "Structured application logging."],
+        ["mPDF", "8.2.7", "Advanced multilingual PDF generation."],
+        ["PHPMailer", "6.12.0", "Email communication support."],
+        ["Twilio SDK", "8.10.0", "SMS integration support."],
+        ["Guzzle", "7.10.0", "External API HTTP client."]
+      ],
+      database: [
+        ["MySQL / MariaDB", "InnoDB", "Core relational database storage."],
+        ["ADODB", "Primary", "Legacy query layer used heavily across OpenEMR."],
+        ["Doctrine DBAL", "Modern", "Newer module database abstraction."],
+        ["utf8mb4", "Unicode", "Full Unicode support for Indian and regional text."],
+        ["Predis", "3.3.0", "Redis cache/session client."],
+        ["Upgrade SQL", "v2.6 → v8.0", "Versioned database upgrade scripts."],
+        ["Audit Logs", "ADODB_mysqli_log", "Query-level tracking and traceability."],
+        ["India Data", "Custom", "India states and cities SQL support."]
+      ],
+      security: [
+        ["OAuth2 Server", "8.4", "API authorization foundation."],
+        ["OpenID Connect", "3.0.1", "SMART on FHIR support direction."],
+        ["JWT", "4.3.0", "Token-based authentication."],
+        ["2FA TOTP", "3.0.2", "Two-factor authentication support."],
+        ["YubiKey U2F", "1.0.2", "Hardware security key support."],
+        ["HTMLPurifier", "4.19.0", "Server-side HTML sanitization."],
+        ["Sodium", "Built-in", "Modern encryption support."],
+        ["Prepared SQL", "ADODB", "SQL injection protection pattern."]
+      ],
+      build: [
+        ["Vite", "8.x", "Primary theme build system, fast watch and build."],
+        ["Gulp", "4.0.2", "Legacy build support for RTL and color themes."],
+        ["ESLint", "9.39.2", "JavaScript quality enforcement."],
+        ["Stylelint", "16.26.1", "SCSS/CSS quality checks."],
+        ["Jest", "29.7.0", "Frontend unit testing."],
+        ["PHPUnit", "11", "Backend unit testing."],
+        ["PHPStan", "2.1", "Static analysis."],
+        ["Rector", "2.1", "Code modernization checks."]
+      ]
+    };
+
+    const modulesGrid = document.getElementById("modulesGrid");
+    const rolesGrid = document.getElementById("rolesGrid");
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalDesc = document.getElementById("modalDesc");
+    const modalList = document.getElementById("modalList");
+    const toast = document.getElementById("toast");
+
+    function renderModules(filter = "all", query = "") {
+      const q = query.trim().toLowerCase();
+      const filtered = modules.filter(item => {
+        const matchFilter = filter === "all" || item.category.includes(filter);
+        const haystack = [item.title, item.desc, item.status, ...item.tags].join(" ").toLowerCase();
+        return matchFilter && (!q || haystack.includes(q));
+      });
+
+      modulesGrid.innerHTML = filtered.map((item, index) => `
+        <article class="module-card" data-index="${modules.indexOf(item)}" tabindex="0">
+          <div class="module-top">
+            <div class="icon-box">${item.icon}</div>
+            <span class="status ${item.status === "Demo Mode" ? "demo" : item.status === "External" ? "external" : ""}">${item.status}</span>
+          </div>
+          <h3>${item.title}</h3>
+          <p>${item.desc}</p>
+          <div class="tags">${item.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}</div>
+        </article>
+      `).join("") || `<div class="feature-card" style="padding: 26px; grid-column: 1/-1;"><h3>No module found</h3><p>Try another keyword like IPD, Billing, ABHA or Dashboard.</p></div>`;
+
+      modulesGrid.querySelectorAll(".module-card").forEach(card => {
+        card.addEventListener("click", () => openModule(Number(card.dataset.index)));
+        card.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") openModule(Number(card.dataset.index));
+        });
+      });
+    }
+
+    function renderRoles() {
+      rolesGrid.innerHTML = roles.map(([icon, title, desc]) => `
+        <article class="role-card">
+          <div class="role-badge">${icon}</div>
+          <h3>${title}</h3>
+          <p>${desc}</p>
+        </article>
+      `).join("");
+    }
+
+    function renderTech() {
+      Object.entries(stacks).forEach(([key, items]) => {
+        const target = document.querySelector(`[data-tech="${key}"]`);
+        target.innerHTML = items.map(([name, version, desc]) => `
+          <article class="tech-card">
+            <span class="version">${version}</span>
+            <h3>${name}</h3>
+            <p>${desc}</p>
+          </article>
+        `).join("");
+      });
+    }
+
+    function openModule(index) {
+      const item = modules[index];
+      if (!item) return;
+      modalTitle.textContent = item.title;
+      modalDesc.textContent = item.desc;
+      modalList.innerHTML = item.details.map(([title, desc]) => `
+        <div class="modal-item"><b>${title}</b><span>${desc}</span></div>
+      `).join("");
+      modalBackdrop.classList.add("active");
+      modalBackdrop.setAttribute("aria-hidden", "false");
+      showToast(`${item.title} details opened`);
+    }
+
+    function closeModal() {
+      modalBackdrop.classList.remove("active");
+      modalBackdrop.setAttribute("aria-hidden", "true");
+    }
+
+    function showSummary() {
+      modalTitle.textContent = "OpenEMR Project — Quick Summary";
+      modalDesc.textContent = "One connected healthcare platform for patient access, staff workflows, clinical operations, billing and India-ready modules.";
+      modalList.innerHTML = [
+        ["External Side", "Patient portal: appointments, reports, payments, ABHA, PMJAY and secure messaging."],
+        ["Internal Side", "Staff dashboard: registration, OPD, IPD, lab, billing, OT and admin controls."],
+        ["Custom Build", "IPD, frontdesk workflow, dashboard context, ABHA, PMJAY, EHI exporter and prior authorizations."],
+        ["Tech Direction", "PHP + MySQL foundation with Bootstrap 5, Vite, Laminas, security libraries and audit-ready database flow."],
+        ["Demo Message", "This is a hospital operations platform, not only a basic patient record system."],
+        ["Presentation Style", "Minimal text, powerful keywords, hover cards, tabs, search and modal explanations."],
+      ].map(([title, desc]) => `<div class="modal-item"><b>${title}</b><span>${desc}</span></div>`).join("");
+      modalBackdrop.classList.add("active");
+      modalBackdrop.setAttribute("aria-hidden", "false");
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    renderModules();
+    renderRoles();
+    renderTech();
+
+    document.querySelectorAll("[data-scroll]").forEach(btn => {
+      btn.addEventListener("click", () => document.querySelector(btn.dataset.scroll)?.scrollIntoView({ behavior: "smooth" }));
+    });
+
+    document.querySelectorAll("[data-open-summary]").forEach(btn => btn.addEventListener("click", showSummary));
+
+    document.getElementById("closeModal").addEventListener("click", closeModal);
+    modalBackdrop.addEventListener("click", (e) => {
+      if (e.target === modalBackdrop) closeModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeModal();
+    });
+
+    const searchInput = document.getElementById("moduleSearch");
+    let activeFilter = "all";
+    searchInput.addEventListener("input", () => renderModules(activeFilter, searchInput.value));
+    document.querySelectorAll(".filter-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeFilter = btn.dataset.filter;
+        renderModules(activeFilter, searchInput.value);
+      });
+    });
+
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const parentWrap = btn.closest(".tab-wrap, .integ-tabs");
+        parentWrap.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        parentWrap.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(`tab-${btn.dataset.tab}`).classList.add("active");
+      });
+    });
+
+    document.querySelectorAll("#stackMenu button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#stackMenu button").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".tech-panel").forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(`stack-${btn.dataset.stack}`).classList.add("active");
+      });
+    });
+
+    const mobileToggle = document.getElementById("mobileToggle");
+    const navLinks = document.getElementById("navLinks");
+    mobileToggle.addEventListener("click", () => navLinks.classList.toggle("open"));
+    navLinks.querySelectorAll("a").forEach(link => link.addEventListener("click", () => navLinks.classList.remove("open")));
+
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add("show");
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll(".reveal").forEach(el => revealObserver.observe(el));
+
+    const countObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting || entry.target.dataset.done) return;
+        entry.target.dataset.done = "true";
+        const end = Number(entry.target.dataset.count || 0);
+        const duration = 900;
+        const start = performance.now();
+        const suffix = end >= 30 ? "+" : "";
+        function tick(now) {
+          const p = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - p, 3);
+          entry.target.textContent = Math.round(end * eased) + suffix;
+          if (p < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      });
+    }, { threshold: 0.6 });
+    document.querySelectorAll("[data-count]").forEach(el => countObserver.observe(el));
+
+    const progressBar = document.getElementById("progressBar");
+    const navAnchors = [...document.querySelectorAll(".nav-links a")];
+    const sections = navAnchors.map(a => document.querySelector(a.getAttribute("href"))).filter(Boolean);
+
+    window.addEventListener("scroll", () => {
+      const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      progressBar.style.width = `${height ? (scrollTop / height) * 100 : 0}%`;
+
+      let current = sections[0]?.id;
+      sections.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= 130) current = section.id;
+      });
+      navAnchors.forEach(a => a.classList.toggle("active", a.getAttribute("href") === `#${current}`));
+    }, { passive: true });
+  </script>
+</body>
+</html>
